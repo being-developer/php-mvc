@@ -3,6 +3,7 @@
 include "controllers/Login.php";
 include "controllers/Logout.php";
 include "controllers/Register.php";
+include "controllers/Category.php";
 include "controllers/test_api.php";
 include "route.php";
 
@@ -25,6 +26,16 @@ $route->add('/deleteProduct','Product@delete');
 $route->add('/updateProduct','Product@update');
 $route->add('/editProduct','Product@edit');
 $route->add('/product','Product@product');
+
+/*
+ * Category Routes
+ */
+$route->add('/addCategory','Category@add');
+$route->add('/deleteCategory','Category@delete');
+$route->add('/updateCategory','Category@update');
+$route->add('/editCategory','Category@edit');
+$route->add('/Category','Category@category');
+
 
 
 $route->add('/home',"home");
