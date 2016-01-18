@@ -2,11 +2,11 @@
 
 class Database
 {
-    protected $conn;
-    protected $error=false;
-    protected $result=[];
-    protected $count=0;
-    protected $message='';
+    private $conn;
+    public $error=false;
+    public $results=[];
+    public $count=0;
+    public $message='';
 
     function __construct() {
 
@@ -52,8 +52,8 @@ class Database
             if (count($params)) {
 
                 $counter = 1;
-
                 foreach ($params as $param) {
+                  //  print_r($params);
                     $this->query->bindValue($counter, $param);
                     $counter++;
                 }
@@ -111,7 +111,7 @@ class Database
             $sql = "INSERT INTO {$table} (`".implode('`,`', $keys)."`) VALUES({$values})";
 
 
-            if(! $this->query($sql, $params.'insert')->error) {
+            if(! $this->query($sql,'insert', $params)->error) {
 
                 return true;
             }
@@ -136,7 +136,7 @@ class Database
 
         $sql = "UPDATE {$table} SET {$set} WHERE id = {$id}";
 
-        if(!$this->query($sql, $params,'update')->error()) {
+        if(!$this->query($sql, 'update',$params)->error()) {
 
             return true;
         }

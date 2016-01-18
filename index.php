@@ -23,9 +23,16 @@ $route->add('/logout','Logout@logout');
 
 $route->add('/addProduct','Product@add');
 $route->add('/deleteProduct','Product@delete');
-$route->add('/updateProduct','Product@update');
-$route->add('/editProduct','Product@edit');
+$route->add('/updateProduct/','Product@update');
 $route->add('/product','Product@product');
+
+/*
+ * Brands Routes
+ */
+$route->add('/addBrand','Brand@add');
+$route->add('/deleteBrand','Brand@delete');
+$route->add('/updateBrand','Brand@update');
+$route->add('/Brand','Brand@category');
 
 /*
  * Category Routes
@@ -33,17 +40,16 @@ $route->add('/product','Product@product');
 $route->add('/addCategory','Category@add');
 $route->add('/deleteCategory','Category@delete');
 $route->add('/updateCategory','Category@update');
-$route->add('/editCategory','Category@edit');
 $route->add('/Category','Category@category');
 
+/*
+ * Discount Routes
+ */
+$route->add('/addDiscount','Discount@add');
+$route->add('/deleteDiscount','Discount@delete');
+$route->add('/updateDiscount','Discount@update');
+$route->add('/Discount','Discount@category');
 
 
-$route->add('/home',"home");
-$route->add('/test-api',"test_api_post");
-
-$route->add('/change_password','change_password');
-
-$route->add('/get_role','get_role');
-$route->add('/is_verified','is_verified');
 
 $route->submit();
