@@ -17,8 +17,7 @@ class route
     public function submit()
     {
        $urigetparam= isset($_GET['id'])?$_GET['id']:'/';
-        print_r($this->_uri);
-        print_r($this->_method);
+
         foreach ($this->_uri as $key=>$value)
         {
             if(preg_match("#^/$urigetparam$#",$value))

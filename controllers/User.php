@@ -1,5 +1,5 @@
 <?php
-include 'Controllers.php';
+
 class User extends Controller
 {
     function __construct()
@@ -13,32 +13,32 @@ class User extends Controller
         $password = isset($request['password'])?$request['password']:null;
         $message = array("message" => "User does not exist", "token" => null, "success" => false);
         if($email && $password) {
+            $sql="select distinct id,salt,password from users where email=?";
+            $params=array();
+            $params['email']=$email;
+            $row = $this->conn->query($sql,"select",$params);
 
-            $stmt = $this->conn->prepare("select distinct id,salt,password from users where email=?");
-            $stmt->bindParam(1, $email);
-            $stmt->execute();
 
-            $row = $stmt->fetch();
-            if ($stmt->rowCount() > 0) {
-                $hashed_value = $row['password'];
-                $salt = $row['salt'];
-                $user_id = $row['id'];
+            if ($row->count > 0) {
+                $hashed_value = $row->results[0]->password;
+                $salt = $row->results[0]->salt;
+                $user_id = $row->results[0]->id;
                 $hashed_expected = hash_hmac('ripemd160', $password, $salt);
                 if ($hashed_value == $hashed_expected) {
                     $token = $this->generateToken();
-                    try {
+                    $params=array();
+                    $params['token']=$token;
+                    $params['active']=1;
+                    $params['user_id']=$user_id;
 
-                        $sql = "INSERT INTO `token`( `token`, `active`, `user_id`) VALUES (?,1,?)";
-                        $insert = $this->conn->prepare($sql);
-                        $insert->bindParam(1, $token);
-                        $insert->bindParam(2, $user_id);
-                        $insert->execute();
-                    } catch (PDOException $e) {
-                        echo $e->getMessage();
-                    }
-                    $message['message'] = "Succesfully looged in ";
-                    $message['token'] = $token;
-                    $message['success'] = true;
+                    if ($this->conn->insert('token', $params)) {
+                        $message['message'] = "Succesfully logged in";
+                        $message['token'] = $token;
+                        $message['success'] = true;
+                    } else
+                        $message['message'] = 'Failed to login';
+
+
 
 
                 } else {
@@ -66,29 +66,29 @@ class User extends Controller
         $message = array("message" => " invalid post params",  "success" => false);
 
         if ($name && $password && $email) {
+            $params=array();
+            $params['email']=$email;
+            $row = $this->conn->query("select *  from users where email = ?",'select',$params);
 
-            $stmt = $this->conn->prepare("select *  from users where email = ?");
-            $stmt->bindParam(1, $email);
-            $stmt->execute();
-            $row = $stmt->fetch();
-            if ($stmt->rowCount() == 0) {
+            if ($row->count==0) {
                 $salt='randomstring';
                 $password=hash_hmac('ripemd160', $password, $salt);
-                try {
-                    $sql = "INSERT INTO `users`( `name`, `email`, `password`,`salt`,`active`, `created_at`) VALUES (?,?,?,?,1,Now())";
-                    $insert = $this->conn->prepare($sql);
-                    $insert->bindParam(1, $name);
-                    $insert->bindParam(2, $email);
-                    $insert->bindParam(3, $password);
-                    $insert->bindParam(4, $salt);
-                    $insert->execute();
-                    $message['message'] = "user successfully Created";
-                    $message['success'] = true;
-                }
-                catch(PDOException $e){
 
-                    $message['message']=$e->getCode()." : ".$e->getMessage();
-                }
+                $params=array();
+                $params['name']=$name;
+                $params['email']=$email;
+                $params['password']=$password;
+                $params['salt']=$salt;
+                $params['active']=1;
+                $params['created_at'] = date("Y-m-d h:i:sa");
+                if ($this->conn->insert('users', $params)) {
+                    $message['message'] = "User Succesfully Created";
+                    $message['success'] = true;
+                } else
+                    $message['message'] = 'User not created';
+
+
+
             }
             else {
                 $message['message'] = "user exists";
@@ -101,27 +101,27 @@ class User extends Controller
         echo json_encode($message);
     }
 
-    function logout($request)
+    function logout($request=[])
     {
-        $token =isset($request['token'])?$request['token']:null;
+
+        $token=getallheaders()['token'];
         $message = array('message' => 'Invalid token', 'success' => false);
         if($token)
         {
-            try {
 
 
-                $stmt = $this->conn->prepare("delete from token where token=?");
-                $stmt->bindParam(1,$token);
-                $stmt->execute();
+               $sql="delete from token where token=?";
+                $params=array();
+                $params['token']=$token;
+                $row = $this->conn->query($sql,'delete',$params);
+                if(!$row->error) {
+                    $message['message'] = 'successfully log out';
+                    $message['success'] = true;
+                }
+                else{
+                    $message['message']='Unable to logout';
+                }
 
-                $message['message']='successfully log out';
-                $message['success']=true;
-
-            }
-            catch(PDOException $e){
-                $message['message']=$e->getCode()." : ".$e->getMessage();
-
-            }
 
         }
         else{

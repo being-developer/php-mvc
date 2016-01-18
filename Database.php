@@ -6,7 +6,7 @@ class Database
     public $error=false;
     public $results=[];
     public $count=0;
-    public $message='';
+    public $message=null;
 
     function __construct() {
 
@@ -53,7 +53,7 @@ class Database
 
                 $counter = 1;
                 foreach ($params as $param) {
-                  //  print_r($params);
+
                     $this->query->bindValue($counter, $param);
                     $counter++;
                 }
@@ -72,7 +72,7 @@ class Database
 
         }
         catch(PDOException $e){
-             $this->message=$e->getMessage();
+             $this->message= $e->getMessage();
              if($type=='select')
              $this->error=true;
         }
@@ -110,8 +110,9 @@ class Database
 
             $sql = "INSERT INTO {$table} (`".implode('`,`', $keys)."`) VALUES({$values})";
 
+           $row=$this->query($sql,'insert', $params);
 
-            if(! $this->query($sql,'insert', $params)->error) {
+            if(!$row ->error ) {
 
                 return true;
             }

@@ -1,10 +1,11 @@
 <?php
-
-include "controllers/Login.php";
-include "controllers/Logout.php";
-include "controllers/Register.php";
+include 'controllers/Controllers.php';
+include "controllers/Brand.php";
+include "controllers/Discount.php";
+include "controllers/User.php";
+include "controllers/Product.php";
 include "controllers/Category.php";
-include "controllers/test_api.php";
+
 include "route.php";
 
 
@@ -12,9 +13,9 @@ include "route.php";
 $route=new route();
 
 
-$route->add('/login','Login@login');
-$route->add('/register','Register@register');
-$route->add('/logout','Logout@logout');
+$route->add('/login','User@login');
+$route->add('/register','User@register');
+$route->add('/logout','User@logout');
 
 
 /*

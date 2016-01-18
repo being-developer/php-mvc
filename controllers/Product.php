@@ -1,6 +1,6 @@
 <?php
 
-class Brand extends Controller
+class Product extends Controller
 {
     function __construct()
     {
@@ -10,10 +10,14 @@ class Brand extends Controller
     function add($request){
 
         $name=isset($request['name'])?$request['name']:null;
-        $display_name=isset($request['display_name'])?$request['display_name']:null;
         $description=isset($request['description'])?$request['description']:null;
-        $category=isset($request['category_id'])?$request['category_id']:null;
         $token=getallheaders()['token'];
+        $price=isset($request['price'])?$request['price']:null;
+        $category=isset($request['category_id'])?$request['category_id']:null;
+        $brand=isset($request['brand_id'])?$request['brand_id']:null;
+        $discount=isset($request['discount_id'])?$request['discount_id']:null;
+        $fid=isset($request['fid'])?$request['fid']:null;
+
 
         $message = array("message" => "Invalid parameters", "success" => false);
         if(!$token)
@@ -22,27 +26,39 @@ class Brand extends Controller
             echo json_encode($message);
             exit();
         }
-        $id=$this->getUserFromToken($token);
-        $message['message']='No Permission to add Brand';
+        $user_id=$this->getUserFromToken($token);
+        $message['message']='No Permission to add Product';
 
-        if($this->isActive($token) && $this->hasPermission($id,'manageBrand') ) {
+        if($this->isActive($token) && $this->hasPermission($user_id,'manageProduct') ) {
+            $add=true;
+
+            if(!$this->category_exist($category)) $add=false;
+            if(!$this->brands_exist($brand))$add=false;
+            if(!$this->discount_exist($discount))$add=false;
 
 
-            $add=$this->category_exist($category);
-            if ($name && $display_name && $add) {
+            $message['message']='Invalid Parameter ';
+
+            if ($name && $price && $category && $brand && $discount && $add) {
+
 
                 $params = array();
                 $params['name'] = $name;
-                $params['display_name'] = $display_name;
-                $params['category_id']=$category;
                 $params['description'] = $description;
+                $params['price'] = $price;
+                $params['category'] = $category;
+                $params['brands'] = $brand;
+                $params['discount'] = $discount;
+                $params['fid']=$fid;
+                $params['created_by'] = $user_id;
                 $params['created_at'] = date("Y-m-d h:i:sa");
 
-                if ($this->conn->insert('brands', $params)) {
-                    $message['message'] = "Brand Succesfully Created";
+
+                if ($this->conn->insert('products', $params)) {
+                    $message['message'] = "Product Succesfully Created";
                     $message['success'] = true;
                 } else
-                    $message['message'] = 'Brand not created';
+                    $message['message'] = 'Product not created';
             }
             else{
                 $message = array("message" => "Invalid parameters", "success" => false);
@@ -63,17 +79,17 @@ class Brand extends Controller
             exit();
         }
         $user_id=$this->getUserFromToken($token);
-        $message['message']='No Permission to manage Brand';
+        $message['message']='No Permission to manage Product';
 
-        if($this->isActive($token) && $this->hasPermission($user_id,'manageBrand') ) {
+        if($this->isActive($token) && $this->hasPermission($user_id,'manageProduct') ) {
             if ($id) {
 
                 $conditions = "id=$id";
-                if ($this->conn->delete('brands', $conditions)) {
-                    $message['message'] = "Brand Succesfully deleted";
+                if ($this->conn->delete('products', $conditions)) {
+                    $message['message'] = "Product Succesfully deleted";
                     $message['success'] = true;
                 } else
-                    $message['message'] = 'Brand not deleted';
+                    $message['message'] = 'Product not deleted';
             } else {
                 $message = array("message" => "Invalid parameters", "success" => false);
             }
@@ -85,11 +101,15 @@ class Brand extends Controller
     }
 
     function update($request){
+
         $id=isset($request['id'])?$request['id']:null;
         $name=isset($request['name'])?$request['name']:null;
-        $display_name=isset($request['display_name'])?$request['display_name']:null;
         $description=isset($request['description'])?$request['description']:null;
+        $price=isset($request['price'])?$request['price']:null;
         $category=isset($request['category_id'])?$request['category_id']:null;
+        $brand=isset($request['brand_id'])?$request['brand_id']:null;
+        $discount=isset($request['discount_id'])?$request['discount_id']:null;
+        $fid=isset($request['fid'])?$request['fid']:null;
         $message = array("message" => "Invalid parameters",  "success" => false);
         $token=getallheaders()['token'];
         if(!$token)
@@ -100,25 +120,35 @@ class Brand extends Controller
         }
         $user_id=$this->getUserFromToken($token);
 
-        $message['message']='No Permission to manage Brand';
+        $message['message']='No Permission to manage Product';
 
-        if($this->isActive($token)  && $this->hasPermission($user_id,'manageBrand') ) {
+        if($this->isActive($token)  && $this->hasPermission($user_id,'manageProduct') ) {
             if ($id) {
+
                 $update=true;
                 $params = array();
                 if ($name) $params['name'] = $name;
-                if ($display_name) $params['display_name'] = $display_name;
                 if ($description) $params['description'] = $description;
-                if ($category && $this->category_exist($category)) $params['category'] = $category;
-                else $update=false;
-                $params['updated_at'] = date("Y-m-d h:i:sa");
+                if ($price) $params['price'] = $price;
+                if($category)
+                    if($this->category_exist($category))$params['category'] = $category;
+                    else $update=false;
+                if($brand)
+                    if( $this->brands_exist($brand))$params['brands'] = $brand;
+                    else $update=false;
+                if($discount)
+                    if( $this->discount_exist($discount))$params['discount']=$discount;
+                    else $update=false;
+                if ($fid)$params['fid']=$fid;
 
+                $params['updated_by']=$user_id;
+                $params['updated_at'] = date("Y-m-d h:i:sa");
                 if($update) {
-                    if ($this->conn->update('brands', $id, $params)) {
-                        $message['message'] = "Brand Succesfully updated";
+                    if ($this->conn->update('products', $id, $params)) {
+                        $message['message'] = "Product Succesfully updated";
                         $message['success'] = true;
                     } else
-                        $message['message'] = 'Brand not updated';
+                        $message['message'] = 'Product not updated';
                 }
                 else{
                     $message = array("message" => "Invalid parameters",  "success" => false);
@@ -131,21 +161,17 @@ class Brand extends Controller
         echo json_encode($message);
     }
 
-    function brands($request){
+    function product($request){
 
         $message = array("message" => "Invalid parameters",  "success" => false);
-
-
-
-
-        if($row=$this->conn->select('brands'))
-        {   $message['message']="Brand ";
+        if($row=$this->conn->select('product'))
+        {   $message['message']="Product ";
             $message['success']=true;
             $message['data']=$row->results;
 
         }
         else
-            $message['message']='Brand';
+            $message['message']='Product';
         echo json_encode($message);
     }
 

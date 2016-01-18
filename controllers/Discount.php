@@ -1,5 +1,5 @@
 <?php
-include 'Controllers.php';
+
 class Discount extends Controller
 {
     function __construct()
@@ -12,7 +12,7 @@ class Discount extends Controller
 
         $discount=isset($request['discount'])?$request['discount']:null;
         $description=isset($request['description'])?$request['description']:null;
-        $token=isset($request['token'])?$request['token']:null;
+       $token=getallheaders()['token'];
         $message = array("message" => "Invalid parameters", "success" => false);
         if(!$token)
         {
@@ -49,7 +49,7 @@ class Discount extends Controller
 
     function delete($request){
         $id=isset($request['id'])?$request['id']:null;
-        $token=isset($request['token'])?$request['token']:null;
+       $token=getallheaders()['token'];
         $message = array("message" => "Invalid parameters", "success" => false);
         if(!$token)
         {
@@ -64,7 +64,7 @@ class Discount extends Controller
             if ($id) {
 
                 $conditions = "id=$id";
-                if ($this->con->delete('discount', $conditions)) {
+                if ($this->conn->delete('discount', $conditions)) {
                     $message['message'] = "Discount Succesfully deleted";
                     $message['success'] = true;
                 } else
@@ -84,7 +84,7 @@ class Discount extends Controller
         $discount=isset($request['discount'])?$request['discount']:null;
         $description=isset($request['description'])?$request['description']:null;
         $message = array("message" => "Invalid parameters",  "success" => false);
-        $token=isset($request['token'])?$request['token']:null;
+       $token=getallheaders()['token'];
         if(!$token)
         {
             $message['message']='Unauthorized Access';
@@ -134,15 +134,5 @@ class Discount extends Controller
         echo json_encode($message);
     }
 
-    function discount_exist($id){
 
-        $sql="select * from discount where id =$id";
-        $row=$this->conn->query($sql,'select');
-        if($row->count>0){
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
 }

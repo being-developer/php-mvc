@@ -1,6 +1,6 @@
 <?php
 
-include 'Database.php';
+include_once 'Database.php';
 class Controller{
 
     protected $conn=null;
@@ -65,5 +65,46 @@ class Controller{
         return $token;
     }
 
+    function category_exist($id){
+
+
+        $sql="select * from category where id =$id";
+        $row=$this->conn->query($sql,'select');
+        if($row->count>0){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    function brands_exist($id){
+
+
+        $sql="select * from brands where id =$id";
+        $row=$this->conn->query($sql,'select');
+        if($row->count>0){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    function discount_exist($id){
+
+        $sql="select * from discount where id =$id";
+        $row=$this->conn->query($sql,'select');
+        if($row->count>0){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    function getToken(){
+        print_r(getallheaders());
+        return isset(getallheaders()['token'])?getallheaders()['token']:null;
+    }
 
 }

@@ -1,5 +1,5 @@
 <?php
-include 'Controllers.php';
+
 class Category extends Controller
 {
     function __construct()
@@ -12,7 +12,7 @@ class Category extends Controller
         $name=isset($request['name'])?$request['name']:null;
         $display_name=isset($request['display_name'])?$request['display_name']:null;
         $description=isset($request['description'])?$request['description']:null;
-        $token=isset($request['token'])?$request['token']:null;
+        $token=getallheaders()['token'];
         $message = array("message" => "Invalid parameters", "success" => false);
         if(!$token)
         {
@@ -50,7 +50,7 @@ class Category extends Controller
 
     function delete($request){
         $id=isset($request['id'])?$request['id']:null;
-        $token=isset($request['token'])?$request['token']:null;
+        $token=getallheaders()['token'];
         $message = array("message" => "Invalid parameters", "success" => false);
         if(!$token)
         {
@@ -65,7 +65,7 @@ class Category extends Controller
             if ($id) {
 
                 $conditions = "id=$id";
-                if ($this->con->delete('category', $conditions)) {
+                if ($this->conn->delete('category', $conditions)) {
                     $message['message'] = "Category Succesfully deleted";
                     $message['success'] = true;
                 } else
@@ -86,7 +86,7 @@ class Category extends Controller
         $display_name=isset($request['display_name'])?$request['display_name']:null;
         $description=isset($request['description'])?$request['description']:null;
         $message = array("message" => "Invalid parameters",  "success" => false);
-        $token=isset($request['token'])?$request['token']:null;
+        $token=getallheaders()['token'];
         if(!$token)
         {
             $message['message']='Unauthorized Access';
